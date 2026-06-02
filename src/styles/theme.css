@@ -1,0 +1,55 @@
+/* Design tokens + light/dark theming via CSS custom properties.
+   `data-theme` on <html> is set by the useTheme hook. */
+
+:root {
+  --font-sans: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.08);
+  --shadow-md: 0 4px 14px rgba(15, 23, 42, 0.12);
+
+  --brand: #4f46e5;
+  --brand-strong: #4338ca;
+  --brand-contrast: #ffffff;
+
+  --tier-high: #16a34a;
+  --tier-med: #d97706;
+  --tier-low: #64748b;
+  --danger: #dc2626;
+}
+
+/* Light theme (default) */
+:root,
+[data-theme='light'] {
+  --bg: #f6f7fb;
+  --surface: #ffffff;
+  --surface-2: #f1f3f9;
+  --border: #e2e6ef;
+  --text: #0f172a;
+  --text-muted: #5b6475;
+  --text-subtle: #8a92a6;
+  --pill-bg: #eef2ff;
+  --pill-text: #4338ca;
+  --input-bg: #ffffff;
+  --hover: #f4f6fb;
+}
+
+/* Dark theme */
+[data-theme='dark'] {
+  --bg: #0b1020;
+  --surface: #141a2e;
+  --surface-2: #1b2238;
+  --border: #28304a;
+  --text: #e8ebf5;
+  --text-muted: #a3acc4;
+  --text-subtle: #6b7596;
+  --pill-bg: #232b47;
+  --pill-text: #c7d2fe;
+  --input-bg: #10162a;
+  --hover: #1a2138;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.5);
+}
