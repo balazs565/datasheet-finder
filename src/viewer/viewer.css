@@ -26,11 +26,12 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  background: var(--gradient-brand);
   color: #fff;
   font-weight: 800;
   font-size: 13px;
   flex-shrink: 0;
+  box-shadow: var(--shadow-brand);
 }
 .viewer-titles {
   display: flex;

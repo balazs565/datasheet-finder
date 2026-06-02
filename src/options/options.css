@@ -22,10 +22,11 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #4f46e5, #2563eb);
+  background: var(--gradient-brand);
   color: #fff;
   font-weight: 800;
   font-size: 16px;
+  box-shadow: var(--shadow-brand);
 }
 .options-header h1 {
   margin: 0;
