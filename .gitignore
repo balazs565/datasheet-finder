@@ -6,3 +6,7 @@ releases
 .DS_Store
 *.log
 .vite
+
+# Screenshot build intermediates (regenerable)
+store-assets/raw
+store-assets/html
