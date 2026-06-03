@@ -31,8 +31,8 @@ Built with **TypeScript + React 18 + Vite** and a clean, modular architecture.
   TP‑Link, QNAP, Fortinet, APC, Epson — plus an **extendable mapping** you can
   add to in Settings.
 - **Free, zero‑install search** — works out of the box via **DuckDuckGo** (no
-  key, no account, nothing to run). Pluggable providers also support **SearXNG**
-  (free, self‑hosted or public) and optional paid APIs.
+  key, no account, nothing to run). Pluggable providers also support optional
+  paid APIs for users who already hold keys.
 - **Result ranking & confidence score** — official manufacturer PDFs rank
   highest; retailer/mirror PDFs rank lower. Each result shows a 0–100 score.
 - **PDF preview** — open in a new tab, in the built‑in viewer, copy the URL, or
@@ -47,13 +47,12 @@ Built with **TypeScript + React 18 + Vite** and a clean, modular architecture.
 | Provider | Setup | Behavior |
 | --- | --- | --- |
 | **DuckDuckGo** (default) | **None** — works on install | Opens a quick **background tab** to load DuckDuckGo, scrapes the rendered results, closes the tab, and shows them **ranked** in the popup with confidence scores. No key, no account, nothing to install. |
-| **SearXNG** (optional) | Paste an instance URL in Settings | Queries a [SearXNG](https://docs.searxng.org/) instance's JSON API (local or public). Free, no key. The most robust free option. |
 | **Open in browser** (fallback) | None | Each generated query opens in a new tab on your chosen engine. Always works — the safety net if a provider is down. |
 | **Bing / Brave / Google** (legacy) | Requires a paid/registered key | Only for users who already hold keys. See below. |
 
 > **Why no Google/Bing keys by default?** As of 2026 the Bing Search API is
 > retired, Google's Custom Search API is closed to new sign‑ups, and Brave's
-> free tier now requires a credit card. DuckDuckGo + SearXNG keep this extension
+> free tier now requires a credit card. DuckDuckGo keeps this extension
 > genuinely free.
 
 ### How the DuckDuckGo provider works (and its limits)
@@ -70,22 +69,7 @@ Trade-offs / notes:
 - It reads the rendered results DOM, so a DuckDuckGo markup change could require
   a small selector update (the scraper already tries several selectors).
 - If it ever returns nothing, the extension **automatically falls back** to the
-  open-in-tabs mode (no error), and you can point the **SearXNG URL** at an
-  instance for a stable JSON API.
-
-### Using SearXNG (optional, most robust free option)
-
-SearXNG is a free, open‑source metasearch engine. You can either use a public
-instance or run your own.
-
-1. Get an instance URL — e.g. a public instance from
-   [searx.space](https://searx.space/), or run your own.
-   > Note: the instance must have the **JSON format enabled**
-   > (`search.formats: [html, json]` in its `settings.yml`). Many do; some public
-   > ones don't.
-2. In **Settings → Search provider**, paste the URL into **SearXNG instance URL**
-   and click **Save**. Approve the one‑time permission prompt for that domain.
-3. Set **Preferred provider** to **SearXNG**.
+  open-in-tabs mode (no error), so a search never dead-ends.
 
 ---
 

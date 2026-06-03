@@ -57,9 +57,8 @@ Upload `releases/datasheet-finder-v<version>-store.zip`. The Web Store requires
 > Optional alternative search providers, used only if the user enters their own
 > API key for that provider in Settings.
 
-**Optional host permission — http://*/* and https://*/* (requested at runtime)**
-> Requested only if the user configures a self-hosted/public SearXNG instance
-> URL, so the extension can query that specific instance. Not granted on install.
+> Note: the extension requests **no** broad `<all_urls>` / `http://*/*` host
+> access. Host permissions are limited to the specific search endpoints above.
 
 ## Remote code
 

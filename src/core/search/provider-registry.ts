@@ -1,6 +1,5 @@
 import type { ProviderId, Settings } from '../types';
 import { duckduckgoProvider } from './duckduckgo-provider';
-import { searxngProvider } from './searxng-provider';
 import { bingProvider } from './bing-provider';
 import { braveProvider } from './brave-provider';
 import { fallbackProvider } from './fallback-provider';
@@ -10,7 +9,6 @@ import type { SearchProvider } from './types';
 /** All registered providers, keyed by id. Add new providers here. */
 export const PROVIDERS: Record<ProviderId, SearchProvider> = {
   duckduckgo: duckduckgoProvider,
-  searxng: searxngProvider,
   bing: bingProvider,
   brave: braveProvider,
   'google-cse': googleCseProvider,
@@ -23,7 +21,6 @@ export const PROVIDERS: Record<ProviderId, SearchProvider> = {
  */
 export const SELECTABLE_PROVIDERS: SearchProvider[] = [
   duckduckgoProvider,
-  searxngProvider,
   fallbackProvider,
   bingProvider,
   braveProvider,

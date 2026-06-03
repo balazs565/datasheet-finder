@@ -83,13 +83,6 @@ code {
   accent-color: var(--brand);
 }
 
-.searxng-row {
-  align-items: stretch;
-}
-.searxng-row .input {
-  flex: 1;
-}
-
 /* manufacturer editor */
 .mfr-add {
   display: grid;

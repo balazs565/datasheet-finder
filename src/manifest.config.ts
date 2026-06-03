@@ -47,9 +47,6 @@ export default defineManifest({
     'https://api.search.brave.com/*',
     'https://www.googleapis.com/*',
   ],
-  // A SearXNG instance URL is user-supplied, so access is requested at runtime
-  // (chrome.permissions.request) when the user saves a URL in Settings.
-  optional_host_permissions: ['http://*/*', 'https://*/*'],
   web_accessible_resources: [
     {
       resources: ['src/viewer/index.html', 'icons/*'],

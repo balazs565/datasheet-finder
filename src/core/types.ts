@@ -4,13 +4,7 @@
  */
 
 /** Identifier for a search provider implementation. */
-export type ProviderId =
-  | 'duckduckgo'
-  | 'searxng'
-  | 'bing'
-  | 'brave'
-  | 'google-cse'
-  | 'fallback';
+export type ProviderId = 'duckduckgo' | 'bing' | 'brave' | 'google-cse' | 'fallback';
 
 /** Which supported search engine the fallback provider opens in a new tab. */
 export type FallbackEngine = 'google' | 'bing' | 'brave' | 'duckduckgo';
@@ -143,11 +137,6 @@ export interface Settings {
   prioritizeManufacturer: boolean;
   /** Theme preference. */
   theme: ThemePreference;
-  /**
-   * Base URL of a SearXNG instance (local or public), used by the SearXNG
-   * provider. Empty = not configured. e.g. "http://localhost:8888".
-   */
-  searxngUrl: string;
   /** API keys for providers. */
   apiKeys: ApiKeys;
   /** User-defined manufacturers, merged over the built-in registry. */

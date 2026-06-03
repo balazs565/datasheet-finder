@@ -11,7 +11,6 @@ export const DEFAULT_SETTINGS: Settings = {
   maxResults: 15,
   prioritizeManufacturer: true,
   theme: 'system',
-  searxngUrl: '',
   apiKeys: {
     bing: '',
     brave: '',

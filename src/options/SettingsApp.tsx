@@ -9,48 +9,16 @@ import type { FallbackEngine, ProviderId, ThemePreference } from '../core/types'
 const PROVIDER_HELP: Record<ProviderId, string> = {
   duckduckgo:
     'Free, no key, nothing to install. Opens a quick background tab to read DuckDuckGo results, then ranks them in the popup. Recommended.',
-  searxng:
-    'Free metasearch. Enter a SearXNG instance URL below (local or public). No key needed.',
   fallback: 'No key needed. Generated queries open in a new tab on your chosen engine.',
   bing: 'Bing Web Search API was retired in 2025 — kept for legacy keys only.',
   brave: 'Requires a Brave Search API token (paid / card required for new accounts).',
   'google-cse': 'Requires a Google API key + Search Engine ID (cx). Closed to new sign-ups.',
 };
 
-/**
- * Ensure the extension has host permission for a SearXNG instance URL, prompting
- * the user once. Returns true if permission is granted (or the URL is empty).
- */
-async function ensureSearxngPermission(url: string): Promise<boolean> {
-  const trimmed = url.trim();
-  if (!trimmed) return true;
-  let origin: string;
-  try {
-    origin = `${new URL(trimmed).origin}/*`;
-  } catch {
-    return false;
-  }
-  try {
-    if (await chrome.permissions.contains({ origins: [origin] })) return true;
-    return await chrome.permissions.request({ origins: [origin] });
-  } catch {
-    return false;
-  }
-}
-
 export function SettingsApp() {
   const { settings, loading, update } = useSettings();
   useTheme(settings.theme);
   const [saved, setSaved] = useState(false);
-  const [searxngInput, setSearxngInput] = useState('');
-  const [searxngInit, setSearxngInit] = useState(false);
-  const [searxngError, setSearxngError] = useState<string | null>(null);
-
-  // Seed the SearXNG input from stored settings once they load.
-  if (!searxngInit && !loading) {
-    setSearxngInput(settings.searxngUrl);
-    setSearxngInit(true);
-  }
 
   const flashSaved = () => {
     setSaved(true);
@@ -64,16 +32,6 @@ export function SettingsApp() {
 
   const setApiKey = (key: keyof typeof settings.apiKeys, value: string) =>
     patch({ apiKeys: { ...settings.apiKeys, [key]: value } });
-
-  const saveSearxngUrl = async () => {
-    const url = searxngInput.trim();
-    setSearxngError(null);
-    if (url && !(await ensureSearxngPermission(url))) {
-      setSearxngError('Permission to access that URL was denied or the URL is invalid.');
-      return;
-    }
-    await patch({ searxngUrl: url });
-  };
 
   if (loading) {
     return (
@@ -107,27 +65,6 @@ export function SettingsApp() {
               options={SELECTABLE_PROVIDERS.map((p) => ({ value: p.id, label: p.label }))}
             />
           </Field>
-
-          <Field
-            label="SearXNG instance URL (optional)"
-            hint="For the SearXNG provider. Works with a local or public instance, e.g. http://localhost:8888 — no key needed."
-          >
-            <div className="row searxng-row">
-              <input
-                className="input"
-                type="text"
-                autoComplete="off"
-                value={searxngInput}
-                onChange={(e) => setSearxngInput(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && saveSearxngUrl()}
-                placeholder="http://localhost:8888"
-              />
-              <button className="btn" onClick={saveSearxngUrl}>
-                Save
-              </button>
-            </div>
-          </Field>
-          {searxngError && <p className="hint" style={{ color: 'var(--danger)' }}>{searxngError}</p>}
 
           <Field
             label="Fallback engine (open-in-tabs mode)"

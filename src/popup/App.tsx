@@ -272,8 +272,7 @@ export function App() {
                   <p className="degraded-note">
                     Couldn’t fetch inline results
                     {search.degradedReason ? ` (${search.degradedReason})` : ''}. Opening
-                    queries on {engineLabel} instead — or set a SearXNG URL in Settings for
-                    reliable in‑popup results.
+                    queries on {engineLabel} instead — click any to view the results.
                   </p>
                 )}
 
@@ -301,7 +300,7 @@ export function App() {
                   <EmptyState
                     icon="📭"
                     title="No results"
-                    hint="Try a more specific model number, switch to “Open in browser” in Settings, or set a SearXNG URL for more robust free results."
+                    hint="Try a more specific model number, or switch to “Open in browser” in Settings to open the queries in new tabs."
                   />
                 )}
               </section>

@@ -22,7 +22,7 @@ results.**
   the page content is never sent anywhere except as part of a search query you
   initiate.
 - **Your settings** — preferred search provider, theme, manufacturer mappings,
-  optional SearXNG URL, and any optional API keys you enter.
+  and any optional API keys you enter.
 - **Local history & favorites** — recent searches and PDFs you star.
 
 ## Where data goes
@@ -31,7 +31,6 @@ The extension talks only to the search service **you select** in Settings:
 
 - **DuckDuckGo (default):** your query is submitted to DuckDuckGo to load and read
   its results page. Subject to [DuckDuckGo's privacy policy](https://duckduckgo.com/privacy).
-- **SearXNG (optional):** your query is sent to the instance URL you configure.
 - **Bing / Brave / Google (optional, legacy):** only if you enter an API key; your
   query is sent to that provider's official API.
 - **Favicons:** to show a small site icon next to each result, the extension
@@ -46,9 +45,9 @@ analytics, advertising, or tracking**.
 
 All stored data stays in your browser via the Chrome Storage API:
 
-- **Settings** (including any API keys and the SearXNG URL) are stored in
-  `chrome.storage.sync`, so they may sync across your signed-in Chrome profiles
-  via Google's account sync. They are never sent anywhere else.
+- **Settings** (including any API keys) are stored in `chrome.storage.sync`, so
+  they may sync across your signed-in Chrome profiles via Google's account sync.
+  They are never sent anywhere else.
 - **Search history, favorites, and the last result set** are stored in
   `chrome.storage.local` on your device only.
 
@@ -64,7 +63,7 @@ Uninstalling the extension removes all locally stored data.
 - **downloads** — to save a PDF or export a CSV when you click Download/Export.
 - **storage** — to save settings, history, and favorites (as described above).
 - **Host access** to DuckDuckGo and the optional provider APIs — to fetch search
-  results. SearXNG host access is requested only when you add an instance URL.
+  results.
 
 ## Children
 

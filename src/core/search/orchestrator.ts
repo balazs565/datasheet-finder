@@ -37,8 +37,8 @@ export interface SearchRun {
  * type build the type-specific queries, run the active provider, and collect
  * the results into a per-type group.
  *
- * Resilience: if the chosen provider throws (e.g. DuckDuckGo 403, SearXNG
- * instance down) or returns nothing for a type, that type automatically falls
+ * Resilience: if the chosen provider throws (e.g. DuckDuckGo 403) or returns
+ * nothing for a type, that type automatically falls
  * back to the always-available open-in-tabs provider instead of surfacing an
  * error. The UI shows a small notice via the `degraded` flag.
  */
