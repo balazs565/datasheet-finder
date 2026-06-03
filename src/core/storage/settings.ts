@@ -1,4 +1,5 @@
 import type { Settings } from '../types';
+import { DEFAULT_DOC_TYPES, resolveDocTypes } from '../doc-types';
 
 /** Storage key for settings in chrome.storage.sync. */
 const SETTINGS_KEY = 'settings';
@@ -18,6 +19,7 @@ export const DEFAULT_SETTINGS: Settings = {
     googleCx: '',
   },
   customManufacturers: [],
+  docTypes: [...DEFAULT_DOC_TYPES],
 };
 
 /**
@@ -31,6 +33,7 @@ function mergeSettings(stored: Partial<Settings> | undefined): Settings {
     ...stored,
     apiKeys: { ...DEFAULT_SETTINGS.apiKeys, ...(stored.apiKeys ?? {}) },
     customManufacturers: stored.customManufacturers ?? DEFAULT_SETTINGS.customManufacturers,
+    docTypes: resolveDocTypes(stored.docTypes),
   };
 }
 

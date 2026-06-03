@@ -10,6 +10,7 @@ const result: SearchResult = {
   source: 'official',
   confidence: 96,
   provider: 'bing',
+  docType: 'datasheet',
 };
 
 describe('resultsToCsv', () => {

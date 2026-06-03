@@ -49,7 +49,7 @@ export const googleCseProvider: SearchProvider = {
 
     return {
       kind: 'results',
-      results: rankResults(raws, ctx.analysis, ctx.settings, 'google-cse'),
+      results: rankResults(raws, ctx.analysis, ctx.settings, 'google-cse', ctx.docType),
     };
   },
 };

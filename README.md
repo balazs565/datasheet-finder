@@ -210,6 +210,33 @@ To **add a provider**: implement the interface in a new file under
 `src/core/search/`, then register it in `provider-registry.ts`. API keys flow in
 through `Settings.apiKeys` — nothing is hardcoded.
 
+### Document types (datasheets, EU DoC, …)
+
+The popup has a **document-type selector** (checkboxes) below the search box.
+Tick one or more types — **Datasheet PDF** and **EU Declaration of Conformity
+(DoC) PDF** ship today — and results come back grouped into independently
+collapsible **accordion sections**, each with its own result count.
+
+Each type is a single data entry in `src/core/doc-types.ts`:
+
+```ts
+export const DOC_TYPES = {
+  datasheet: { label: 'Datasheets', searchTerms: ['datasheet', 'spec sheet', …], … },
+  doc: {
+    label: 'EU Declarations of Conformity',
+    searchTerms: ['EU Declaration of Conformity', 'Declaration of Conformity', 'CE Declaration', 'DoC'],
+    …
+  },
+};
+```
+
+The search engine **iterates the enabled types** (`runSearch` in
+`orchestrator.ts`): for each it builds type-specific queries
+(`buildQueries(analysis, config)`), runs the active provider, and tags +
+scores the results for that type. To **add a new document type**, add a member
+to `DocTypeId` and an entry to `DOC_TYPES` — the query builder, ranker,
+orchestrator, selector and accordion all pick it up with no further changes.
+
 ### Extending the manufacturer registry
 
 - **Permanently:** add an entry to `BUILTIN_MANUFACTURERS` in

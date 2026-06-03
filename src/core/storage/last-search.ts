@@ -1,4 +1,5 @@
-import type { ProductAnalysis, SearchResult } from '../types';
+import type { DocTypeId, ProductAnalysis } from '../types';
+import type { DocTypeGroup } from '../search/orchestrator';
 
 const LAST_SEARCH_KEY = 'lastSearch';
 
@@ -13,8 +14,10 @@ const LAST_SEARCH_KEY = 'lastSearch';
  */
 export interface LastSearchSnapshot {
   query: string;
-  results: SearchResult[];
-  tabs: { label: string; url: string }[];
+  /** Document types that were searched. */
+  docTypes: DocTypeId[];
+  /** Results grouped by document type. */
+  groups: DocTypeGroup[];
   analysis: ProductAnalysis | null;
   degraded: boolean;
   degradedReason: string | null;

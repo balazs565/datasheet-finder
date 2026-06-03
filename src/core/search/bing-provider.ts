@@ -45,6 +45,9 @@ export const bingProvider: SearchProvider = {
       }
     }
 
-    return { kind: 'results', results: rankResults(raws, ctx.analysis, ctx.settings, 'bing') };
+    return {
+      kind: 'results',
+      results: rankResults(raws, ctx.analysis, ctx.settings, 'bing', ctx.docType),
+    };
   },
 };

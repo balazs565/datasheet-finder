@@ -1,24 +1,25 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useSettings } from '../hooks/useSettings';
 import { useTheme } from '../hooks/useTheme';
 import { useHistory } from '../hooks/useHistory';
 import { useFavorites } from '../hooks/useFavorites';
 import { useSearch } from '../hooks/useSearch';
 import { SearchBox } from '../components/SearchBox';
+import { DocTypeSelector } from '../components/DocTypeSelector';
+import { DocTypeSection } from '../components/DocTypeSection';
 import { RecentSearches } from '../components/RecentSearches';
-import { ResultList } from '../components/ResultList';
-import { FallbackList } from '../components/FallbackList';
 import { EmptyState, ErrorState, LoadingState } from '../components/states';
 import { FavoritesPanel } from './FavoritesPanel';
 import { resultsToCsv, csvDataUrl } from '../core/export/csv';
 import { downloadUrl, openInNewTab } from '../core/util/actions';
 import { getLastSearch } from '../core/storage/last-search';
+import { resolveDocTypes } from '../core/doc-types';
 import {
   PENDING_QUERY_KEY,
   type DetectProductsResponse,
   type PendingQuery,
 } from '../core/messaging/messages';
-import type { SearchResult } from '../core/types';
+import type { DocTypeId, SearchResult } from '../core/types';
 
 type Tab = 'search' | 'favorites';
 
@@ -30,7 +31,7 @@ const ENGINE_LABELS: Record<string, string> = {
 };
 
 export function App() {
-  const { settings, loading: settingsLoading } = useSettings();
+  const { settings, loading: settingsLoading, update } = useSettings();
   useTheme(settings.theme);
   const { history, record, remove, clear } = useHistory();
   const { favorites, favoriteUrls, toggle, remove: removeFavorite } = useFavorites();
@@ -38,18 +39,47 @@ export function App() {
 
   const [tab, setTab] = useState<Tab>('search');
   const [query, setQuery] = useState('');
+  const [docTypes, setDocTypes] = useState<DocTypeId[]>(settings.docTypes);
+  const [docTypesReady, setDocTypesReady] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [detecting, setDetecting] = useState(false);
   const [detectMsg, setDetectMsg] = useState<string | null>(null);
 
+  // Seed the selected document types from saved settings once they load.
+  useEffect(() => {
+    if (settingsLoading || docTypesReady) return;
+    setDocTypes(resolveDocTypes(settings.docTypes));
+    setDocTypesReady(true);
+  }, [settingsLoading, docTypesReady, settings.docTypes]);
+
+  // Default each section's expanded state when a new result set arrives:
+  // open the sections that have content, collapse the empty ones.
+  useEffect(() => {
+    if (search.status !== 'success') return;
+    setExpanded(
+      Object.fromEntries(
+        search.groups.map((g) => [g.docType, g.results.length + g.tabs.length > 0]),
+      ),
+    );
+  }, [search.groups, search.status]);
+
+  const onChangeDocTypes = useCallback(
+    (next: DocTypeId[]) => {
+      setDocTypes(next);
+      void update({ docTypes: next });
+    },
+    [update],
+  );
+
   const runSearch = useCallback(
-    async (raw: string) => {
+    async (raw: string, types: DocTypeId[] = docTypes) => {
       const value = raw.trim();
       if (!value || settingsLoading) return;
       setTab('search');
-      const analysis = await search.search(value, settings);
+      const analysis = await search.search(value, settings, resolveDocTypes(types));
       if (analysis) await record(analysis);
     },
-    [search, settings, settingsLoading, record],
+    [search, settings, settingsLoading, record, docTypes],
   );
 
   // On open: run a pending query (from context menu / shortcut), else restore
@@ -68,6 +98,10 @@ export function App() {
       getLastSearch().then((snapshot) => {
         if (snapshot) {
           setQuery(snapshot.query);
+          if (snapshot.docTypes?.length) {
+            setDocTypes(resolveDocTypes(snapshot.docTypes));
+            setDocTypesReady(true);
+          }
           search.hydrate(snapshot);
         }
       });
@@ -105,11 +139,22 @@ export function App() {
     [toggle, search.analysis],
   );
 
+  // All ranked results across every document-type group, for CSV export.
+  const allResults = useMemo(
+    () => search.groups.flatMap((g) => g.results),
+    [search.groups],
+  );
+
+  const hasAnyContent = useMemo(
+    () => search.groups.some((g) => g.results.length + g.tabs.length > 0),
+    [search.groups],
+  );
+
   const exportCsv = useCallback(() => {
-    if (search.results.length === 0) return;
+    if (allResults.length === 0) return;
     const name = search.analysis?.normalized?.replace(/[^a-z0-9]+/gi, '-') || 'results';
-    downloadUrl(csvDataUrl(resultsToCsv(search.results)), `datasheet-${name}.csv`);
-  }, [search.results, search.analysis]);
+    downloadUrl(csvDataUrl(resultsToCsv(allResults)), `datasheet-${name}.csv`);
+  }, [allResults, search.analysis]);
 
   const engineLabel = ENGINE_LABELS[settings.fallbackEngine] ?? 'your search engine';
 
@@ -157,6 +202,12 @@ export function App() {
               detecting={detecting}
             />
 
+            <DocTypeSelector
+              selected={docTypes}
+              onChange={onChangeDocTypes}
+              disabled={search.status === 'loading'}
+            />
+
             {detectMsg && <p className="detect-msg muted">{detectMsg}</p>}
 
             {search.status === 'idle' && (
@@ -171,8 +222,8 @@ export function App() {
                   onClear={clear}
                 />
                 <EmptyState
-                  title="Find a datasheet"
-                  hint="Paste a product name above, use Detect to read the current page, or right-click selected text on any site."
+                  title="Find a document"
+                  hint="Pick document types above, paste a product name, use Detect to read the current page, or right-click selected text on any site."
                 />
               </>
             )}
@@ -197,7 +248,7 @@ export function App() {
                       )}
                     </span>
                     <span className="row analysis-actions">
-                      {search.results.length > 0 && (
+                      {allResults.length > 0 && (
                         <button className="btn-ghost btn-sm" onClick={exportCsv}>
                           Export CSV
                         </button>
@@ -225,20 +276,27 @@ export function App() {
                   </p>
                 )}
 
-                {search.tabs.length > 0 && (
-                  <FallbackList tabs={search.tabs} engineLabel={engineLabel} />
-                )}
-
-                {search.results.length > 0 && (
-                  <ResultList
-                    results={search.results}
-                    manufacturer={search.analysis?.manufacturer?.name ?? null}
-                    favoriteUrls={favoriteUrls}
-                    onToggleFavorite={onToggleFavorite}
-                  />
-                )}
-
-                {search.results.length === 0 && search.tabs.length === 0 && (
+                {hasAnyContent ? (
+                  <div className="doctype-sections">
+                    {search.groups.map((group) => (
+                      <DocTypeSection
+                        key={group.docType}
+                        group={group}
+                        expanded={expanded[group.docType] ?? false}
+                        onToggle={() =>
+                          setExpanded((e) => ({
+                            ...e,
+                            [group.docType]: !(e[group.docType] ?? false),
+                          }))
+                        }
+                        manufacturer={search.analysis?.manufacturer?.name ?? null}
+                        favoriteUrls={favoriteUrls}
+                        onToggleFavorite={onToggleFavorite}
+                        engineLabel={engineLabel}
+                      />
+                    ))}
+                  </div>
+                ) : (
                   <EmptyState
                     icon="📭"
                     title="No results"

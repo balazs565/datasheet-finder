@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
-import type { ProductAnalysis, SearchResult, Settings } from '../core/types';
-import { runSearch } from '../core/search/orchestrator';
+import type { DocTypeId, ProductAnalysis, Settings } from '../core/types';
+import { runSearch, type DocTypeGroup } from '../core/search/orchestrator';
 import { SearchProviderError } from '../core/search/types';
 import type { SearchProvider } from '../core/search/types';
 import {
@@ -13,22 +13,19 @@ export type SearchStatus = 'idle' | 'loading' | 'success' | 'error';
 
 export interface SearchState {
   status: SearchStatus;
-  /** Inline ranked results (key-backed providers). */
-  results: SearchResult[];
-  /** Open-in-tab links (fallback provider). */
-  tabs: { label: string; url: string }[];
+  /** Results (and fallback tabs) grouped by document type. */
+  groups: DocTypeGroup[];
   analysis: ProductAnalysis | null;
   provider: SearchProvider | null;
   error: string | null;
-  /** True when we fell back to open-in-tabs because a provider failed. */
+  /** True when we fell back to open-in-tabs for at least one document type. */
   degraded: boolean;
   degradedReason: string | null;
 }
 
 const INITIAL: SearchState = {
   status: 'idle',
-  results: [],
-  tabs: [],
+  groups: [],
   analysis: null,
   provider: null,
   error: null,
@@ -38,39 +35,42 @@ const INITIAL: SearchState = {
 
 /**
  * Drive a search through the core orchestrator and expose loading / success /
- * error state plus the resulting data. The caller decides what to do with
- * history recording (so we don't double-record).
+ * error state plus the resulting grouped data. The caller decides what to do
+ * with history recording (so we don't double-record).
  */
 export function useSearch() {
   const [state, setState] = useState<SearchState>(INITIAL);
 
   const search = useCallback(
-    async (raw: string, settings: Settings): Promise<ProductAnalysis | null> => {
+    async (
+      raw: string,
+      settings: Settings,
+      docTypes: DocTypeId[],
+    ): Promise<ProductAnalysis | null> => {
       const trimmed = raw.trim();
       if (!trimmed) return null;
       setState((s) => ({ ...s, status: 'loading', error: null }));
       try {
-        const { analysis, provider, outcome, degraded, degradedReason } = await runSearch(
+        const { analysis, provider, groups, degraded, degradedReason } = await runSearch(
           trimmed,
           settings,
+          docTypes,
         );
-        const base = {
-          status: 'success' as const,
+        setState({
+          status: 'success',
+          groups,
           analysis,
           provider,
           error: null,
           degraded,
           degradedReason: degradedReason ?? null,
-        };
-        const results = outcome.kind === 'results' ? outcome.results : [];
-        const tabs = outcome.kind === 'open-tabs' ? outcome.tabs : [];
-        setState({ ...base, results, tabs });
+        });
 
         // Persist so the results survive the popup closing.
         void saveLastSearch({
           query: trimmed,
-          results,
-          tabs,
+          docTypes,
+          groups,
           analysis,
           degraded,
           degradedReason: degradedReason ?? null,
@@ -95,8 +95,7 @@ export function useSearch() {
   const hydrate = useCallback((snapshot: LastSearchSnapshot) => {
     setState({
       status: 'success',
-      results: snapshot.results,
-      tabs: snapshot.tabs,
+      groups: snapshot.groups,
       analysis: snapshot.analysis,
       provider: null,
       error: null,

@@ -10,17 +10,21 @@ const ENGINE_URL: Record<FallbackEngine, (q: string) => string> = {
   duckduckgo: (q) => `https://duckduckgo.com/?q=${encodeURIComponent(q)}`,
 };
 
-/** Human-friendly label for each generated query, by position. */
-const LABELS = [
-  'Datasheet PDF',
-  'Spec sheet PDF',
-  'Specifications PDF',
-  'Technical specifications PDF',
-  'Product brief PDF',
-  'Any PDF (filetype:pdf)',
-  'Manufacturer site — PDF',
-  'Manufacturer site — datasheet',
-];
+/**
+ * Derive a human-friendly label from a query by stripping the product name and
+ * tidying the remaining search operators — works for any document type rather
+ * than relying on a fixed positional list.
+ */
+function labelForQuery(query: string, productName: string): string {
+  let rest = query;
+  if (productName) rest = rest.split(productName).join(' ');
+  rest = rest.replace(/\s+/g, ' ').trim();
+  rest = rest.replace(/filetype:pdf/gi, 'PDF');
+  rest = rest.replace(/^site:(\S+)\s*/i, 'On $1 — ');
+  rest = rest.trim().replace(/\s+pdf$/i, ' PDF');
+  if (!rest) return 'Any PDF';
+  return rest.charAt(0).toUpperCase() + rest.slice(1);
+}
 
 /**
  * Zero-config provider. Requires no API key: it turns each generated query
@@ -44,8 +48,9 @@ export const fallbackProvider: SearchProvider = {
     const queryStrings =
       queries.length > 0 ? queries.map((q) => q.query) : buildPlainQueries(ctx.analysis);
 
-    const tabs = queryStrings.map((q, i) => ({
-      label: LABELS[i] ?? `Query ${i + 1}`,
+    const productName = ctx.analysis.normalized.trim();
+    const tabs = queryStrings.map((q) => ({
+      label: labelForQuery(q, productName),
       url: build(q),
     }));
 

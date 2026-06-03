@@ -15,6 +15,13 @@ export type ProviderId =
 /** Which supported search engine the fallback provider opens in a new tab. */
 export type FallbackEngine = 'google' | 'bing' | 'brave' | 'duckduckgo';
 
+/**
+ * Identifier for a searchable document type. The full configuration lives in
+ * `core/doc-types.ts`; this union keeps the rest of `core/` type-safe without a
+ * circular import.
+ */
+export type DocTypeId = 'datasheet' | 'doc';
+
 /** Theme preference. `system` follows `prefers-color-scheme`. */
 export type ThemePreference = 'light' | 'dark' | 'system';
 
@@ -43,12 +50,18 @@ export type ResultSource =
 export interface GeneratedQuery {
   /** The raw query string sent to a provider or search engine. */
   query: string;
-  /** Semantic intent of the query. */
-  intent: QueryIntent;
+  /**
+   * Semantic intent of the query. Well-known datasheet intents are listed in
+   * {@link QueryIntent}; document-type-specific intents are derived from the
+   * type's search terms, so the field is a string for extensibility.
+   */
+  intent: string;
   /** Relative weight (0–1) used by the ranker as an intent prior. */
   weight: number;
   /** True when the query is scoped to the manufacturer domain (site:). */
   manufacturerScoped: boolean;
+  /** The document type this query searches for. */
+  docType: DocTypeId;
 }
 
 /** A manufacturer entry in the extendable registry. */
@@ -93,12 +106,19 @@ export interface SearchResult {
   confidence: number;
   /** Provider that produced this result. */
   provider: ProviderId;
+  /** The document type this result was searched and grouped under. */
+  docType: DocTypeId;
 }
 
 /** Context passed into a provider's `search` call. */
 export interface SearchContext {
   analysis: ProductAnalysis;
   settings: Settings;
+  /**
+   * The document type being searched. Providers forward it to the ranker so
+   * results are scored and tagged for the right type. Defaults to `datasheet`.
+   */
+  docType?: DocTypeId;
 }
 
 /** Per-provider API keys. Empty string = not configured. */
@@ -132,6 +152,11 @@ export interface Settings {
   apiKeys: ApiKeys;
   /** User-defined manufacturers, merged over the built-in registry. */
   customManufacturers: Manufacturer[];
+  /**
+   * Document types to search for, remembered across sessions. Empty/invalid
+   * falls back to the default (datasheet only). See `core/doc-types.ts`.
+   */
+  docTypes: DocTypeId[];
 }
 
 /** A stored search-history entry. */

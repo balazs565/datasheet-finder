@@ -1,4 +1,5 @@
-import type { ProductAnalysis, ResultSource, SearchResult, Settings } from '../types';
+import type { DocTypeId, ProductAnalysis, ResultSource, SearchResult, Settings } from '../types';
+import { DOC_TYPES } from '../doc-types';
 import { hostnameOf, isSameOrSubdomain, looksLikePdf } from '../util/url';
 
 /** Known retailer / aggregator / mirror domains that should rank lower. */
@@ -13,7 +14,6 @@ const MIRROR_DOMAINS = [
   'docslib.org', 'yumpu.com',
 ];
 
-const DATASHEET_KEYWORDS = ['datasheet', 'data sheet', 'spec sheet', 'specsheet', 'specification'];
 const BRIEF_KEYWORDS = ['product brief', 'brief', 'overview', 'quickspecs'];
 const MANUAL_KEYWORDS = ['manual', 'user guide', 'userguide', 'guide', 'handbook', 'install'];
 
@@ -36,6 +36,7 @@ export function scoreResult(
   raw: RawResult,
   analysis: ProductAnalysis,
   settings: Settings,
+  docType: DocTypeId = 'datasheet',
 ): { source: ResultSource; confidence: number; isPdf: boolean; domain: string } {
   const host = hostnameOf(raw.url);
   const text = `${raw.title} ${raw.url} ${raw.snippet ?? ''}`.toLowerCase();
@@ -45,7 +46,8 @@ export function scoreResult(
     ? isSameOrSubdomain(host, manufacturerDomain)
     : false;
 
-  const hasDatasheetKw = matchesAny(text, DATASHEET_KEYWORDS);
+  // Keywords that signal a match for the document type being searched.
+  const hasDatasheetKw = matchesAny(text, DOC_TYPES[docType].rankKeywords);
   const hasBriefKw = matchesAny(text, BRIEF_KEYWORDS);
   const hasManualKw = matchesAny(text, MANUAL_KEYWORDS);
 
@@ -113,6 +115,7 @@ export function rankResults(
   analysis: ProductAnalysis,
   settings: Settings,
   provider: SearchResult['provider'],
+  docType: DocTypeId = 'datasheet',
 ): SearchResult[] {
   const seen = new Set<string>();
   const scored: SearchResult[] = [];
@@ -121,7 +124,7 @@ export function rankResults(
     const key = raw.url.split('#')[0];
     if (seen.has(key)) continue;
     seen.add(key);
-    const { source, confidence, isPdf, domain } = scoreResult(raw, analysis, settings);
+    const { source, confidence, isPdf, domain } = scoreResult(raw, analysis, settings, docType);
     scored.push({
       title: raw.title,
       url: raw.url,
@@ -131,6 +134,7 @@ export function rankResults(
       source,
       confidence,
       provider,
+      docType,
     });
   }
 

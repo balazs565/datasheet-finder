@@ -46,6 +46,9 @@ export const braveProvider: SearchProvider = {
       }
     }
 
-    return { kind: 'results', results: rankResults(raws, ctx.analysis, ctx.settings, 'brave') };
+    return {
+      kind: 'results',
+      results: rankResults(raws, ctx.analysis, ctx.settings, 'brave', ctx.docType),
+    };
   },
 };

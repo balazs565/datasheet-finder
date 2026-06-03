@@ -81,7 +81,7 @@ export const duckduckgoProvider: SearchProvider = {
       const raws = await searchViaBackgroundTab(selected);
       return {
         kind: 'results',
-        results: rankResults(raws, ctx.analysis, ctx.settings, 'duckduckgo'),
+        results: rankResults(raws, ctx.analysis, ctx.settings, 'duckduckgo', ctx.docType),
       };
     } catch (err) {
       throw err instanceof SearchProviderError

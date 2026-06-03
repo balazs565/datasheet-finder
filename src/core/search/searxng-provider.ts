@@ -52,7 +52,7 @@ export const searxngProvider: SearchProvider = {
 
     return {
       kind: 'results',
-      results: rankResults(raws, ctx.analysis, ctx.settings, 'searxng'),
+      results: rankResults(raws, ctx.analysis, ctx.settings, 'searxng', ctx.docType),
     };
   },
 };
