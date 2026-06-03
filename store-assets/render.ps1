@@ -23,7 +23,8 @@ $final = Join-Path $base "screenshots"
 New-Item -ItemType Directory -Force $raw, $final | Out-Null
 
 $i = 0
-Get-ChildItem $html -Filter *.html | Sort-Object Name | ForEach-Object {
+# The marquee tile is a different size — it has its own script (render-marquee.ps1).
+Get-ChildItem $html -Filter *.html | Where-Object { $_.Name -ne 'marquee.html' } | Sort-Object Name | ForEach-Object {
   $i++
   $rawPng = Join-Path $raw ($_.BaseName + ".png")
   $url = "file:///" + ($_.FullName -replace '\\', '/')

@@ -1,6 +1,11 @@
 # Store assets
 
-Marketing screenshots for the Chrome Web Store listing.
+Marketing images for the Chrome Web Store listing.
+
+## `marquee/` — promo tile (optional, for featuring)
+
+`marquee/marquee.png` — the **marquee promotional tile**: **1400×560, 24‑bit PNG
+(no alpha)**. Used when the store features the extension.
 
 ## `screenshots/` — upload these
 
@@ -35,6 +40,15 @@ on‑brand.
 
    Output lands in `store-assets/screenshots/`. The intermediate
    `store-assets/html/` and `store-assets/raw/` folders are git‑ignored.
+
+For the **marquee tile** (1400×560), run the matching pair:
+
+```bash
+node store-assets/gen-marquee.mjs       # → store-assets/html/marquee.html
+```
+```powershell
+./store-assets/render-marquee.ps1       # → store-assets/marquee/marquee.png
+```
 
 > On macOS/Linux, render the `html/*.html` files at a 1280×800 viewport with any
 > headless browser and export as JPEG (no alpha) instead.
