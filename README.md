@@ -1,5 +1,9 @@
 # Datasheet Finder
 
+### [⬇️ Install from the Chrome Web Store](https://chromewebstore.google.com/detail/njilepagmjldaijldafbelpbojjnhgna?utm_source=item-share-cb)
+
+[![Available in the Chrome Web Store](https://img.shields.io/badge/Chrome%20Web%20Store-Install-4285F4?logo=googlechrome&logoColor=white)](https://chromewebstore.google.com/detail/njilepagmjldaijldafbelpbojjnhgna?utm_source=item-share-cb)
+
 A polished **Chrome Extension (Manifest V3)** that helps you find official
 datasheets, spec sheets, technical PDFs, product briefs, and manuals for any
 product — straight from the browser.
