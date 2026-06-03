@@ -21,6 +21,20 @@ export function isSameOrSubdomain(host: string, domain: string): boolean {
   return h === d || h.endsWith(`.${d}`);
 }
 
+/**
+ * True only for `http:`/`https:` URLs. Used as a safety gate before navigating
+ * to or framing a user/result-supplied URL, so `javascript:`, `data:`, `file:`
+ * and other schemes are never loaded by the extension.
+ */
+export function isHttpUrl(url: string): boolean {
+  try {
+    const { protocol } = new URL(url);
+    return protocol === 'http:' || protocol === 'https:';
+  } catch {
+    return false;
+  }
+}
+
 /** Heuristic check that a URL points at a PDF. */
 export function looksLikePdf(url: string, title = '', snippet = ''): boolean {
   const u = url.toLowerCase();

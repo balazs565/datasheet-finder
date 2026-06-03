@@ -1,29 +1,31 @@
-import type {
-  DetectProductsResponse,
-  RuntimeMessage,
-} from '../core/messaging/messages';
 import type { DetectedProduct } from '../core/types';
 
 /**
- * Content script: detects likely product names on the current page on demand.
- * Injected by the popup via chrome.scripting; communicates over runtime
- * messaging. Pure DOM reads — never mutates the page.
+ * Detect likely product names on the current page.
+ *
+ * This is injected into the page on demand via `chrome.scripting.executeScript`
+ * (gated by `activeTab`, granted when the user opens the popup), rather than via
+ * an always-on content script. That keeps the extension off every page until
+ * the user explicitly asks to detect — minimizing permissions and attack
+ * surface.
+ *
+ * IMPORTANT: the function is serialized and runs in the *page* context, so it
+ * must be fully self-contained — no references to imports or module-scope
+ * bindings. All helpers are declared inside. It only ever *reads* the DOM.
  */
+export function detectProductsInPage(): DetectedProduct[] {
+  const MODEL_RE = /\b([A-Z0-9]{2,}(?:[-/][A-Z0-9]+){1,3})\b/g;
 
-/** Regex for tokens that look like model numbers (e.g. MFC-L5715DN, RB5009). */
-const MODEL_RE = /\b([A-Z0-9]{2,}(?:[-/][A-Z0-9]+){1,3})\b/g;
+  const clip = (text: string, max = 80): string => {
+    const t = text.replace(/\s+/g, ' ').trim();
+    return t.length > max ? t.slice(0, max).trim() : t;
+  };
 
-function clip(text: string, max = 80): string {
-  const t = text.replace(/\s+/g, ' ').trim();
-  return t.length > max ? t.slice(0, max).trim() : t;
-}
+  const metaContent = (selector: string): string | null => {
+    const el = document.querySelector<HTMLMetaElement>(selector);
+    return el?.content?.trim() || null;
+  };
 
-function metaContent(selector: string): string | null {
-  const el = document.querySelector<HTMLMetaElement>(selector);
-  return el?.content?.trim() || null;
-}
-
-function detectProducts(): DetectedProduct[] {
   const candidates: DetectedProduct[] = [];
   const push = (name: string, source: DetectedProduct['source'], confidence: number) => {
     const clean = clip(name);
@@ -62,12 +64,3 @@ function detectProducts(): DetectedProduct[] {
   }
   return [...byName.values()].sort((a, b) => b.confidence - a.confidence).slice(0, 6);
 }
-
-chrome.runtime.onMessage.addListener(
-  (message: RuntimeMessage, _sender, sendResponse: (r: DetectProductsResponse) => void) => {
-    if (message.type === 'DETECT_PRODUCTS') {
-      sendResponse({ type: 'DETECT_PRODUCTS_RESULT', products: detectProducts() });
-    }
-    return true;
-  },
-);

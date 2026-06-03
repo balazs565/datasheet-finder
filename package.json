@@ -13,7 +13,8 @@
     "test:watch": "vitest",
     "lint": "eslint \"src/**/*.{ts,tsx}\"",
     "format": "prettier --write \"src/**/*.{ts,tsx,css}\"",
-    "package": "npm run build && node scripts/pack.mjs"
+    "package": "npm run build && node scripts/pack.mjs",
+    "package:store": "npm run build && node scripts/pack.mjs --store"
   },
   "dependencies": {
     "react": "^18.3.1",

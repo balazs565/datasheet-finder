@@ -14,12 +14,9 @@ import { resultsToCsv, csvDataUrl } from '../core/export/csv';
 import { downloadUrl, openInNewTab } from '../core/util/actions';
 import { getLastSearch } from '../core/storage/last-search';
 import { resolveDocTypes } from '../core/doc-types';
-import {
-  PENDING_QUERY_KEY,
-  type DetectProductsResponse,
-  type PendingQuery,
-} from '../core/messaging/messages';
-import type { DocTypeId, SearchResult } from '../core/types';
+import { detectProductsInPage } from '../content/detect';
+import { PENDING_QUERY_KEY, type PendingQuery } from '../core/messaging/messages';
+import type { DetectedProduct, DocTypeId, SearchResult } from '../core/types';
 
 type Tab = 'search' | 'favorites';
 
@@ -115,10 +112,14 @@ export function App() {
     try {
       const [activeTab] = await chrome.tabs.query({ active: true, currentWindow: true });
       if (!activeTab?.id) throw new Error('No active tab');
-      const response = (await chrome.tabs.sendMessage(activeTab.id, {
-        type: 'DETECT_PRODUCTS',
-      })) as DetectProductsResponse | undefined;
-      const best = response?.products?.[0];
+      // Inject the detector on demand (activeTab) rather than running a content
+      // script on every page. Returns the scraped candidates directly.
+      const [injection] = await chrome.scripting.executeScript({
+        target: { tabId: activeTab.id },
+        func: detectProductsInPage,
+      });
+      const products = (injection?.result as DetectedProduct[] | undefined) ?? [];
+      const best = products[0];
       if (best) {
         setQuery(best.name);
         await runSearch(best.name);

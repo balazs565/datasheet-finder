@@ -3,9 +3,12 @@ import { defineManifest } from '@crxjs/vite-plugin';
 /**
  * Manifest V3 definition for Datasheet Finder.
  *
- * Host permissions are scoped to the search-provider API endpoints. The
- * content script is injected on demand via `chrome.scripting`, so we rely on
- * `activeTab` + `scripting` rather than a broad static content-script match.
+ * Host permissions are scoped to the search-provider API endpoints. Page
+ * detection is injected on demand via `chrome.scripting.executeScript` (gated
+ * by `activeTab`, granted when the user opens the popup) rather than a static
+ * all-URLs content script — so the extension never runs on a page until the
+ * user explicitly asks. This avoids the "read your data on all websites"
+ * permission warning.
  */
 export default defineManifest({
   manifest_version: 3,
@@ -33,13 +36,6 @@ export default defineManifest({
     service_worker: 'src/background/service-worker.ts',
     type: 'module',
   },
-  content_scripts: [
-    {
-      matches: ['http://*/*', 'https://*/*'],
-      js: ['src/content/content-script.ts'],
-      run_at: 'document_idle',
-    },
-  ],
   permissions: ['contextMenus', 'storage', 'activeTab', 'scripting', 'downloads'],
   host_permissions: [
     // Free default provider — baked in so it works on install with no prompt.

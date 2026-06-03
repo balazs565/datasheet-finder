@@ -1,12 +1,16 @@
 /** Browser-side actions shared by the popup and viewer. */
 
-/** Open a URL in a new background-ish tab. */
+import { isHttpUrl } from './url';
+
+/** Open an http(s) URL in a new tab. Other schemes are ignored for safety. */
 export function openInNewTab(url: string): void {
+  if (!isHttpUrl(url)) return;
   void chrome.tabs.create({ url });
 }
 
-/** Open the in-extension PDF viewer for a URL. */
+/** Open the in-extension PDF viewer for an http(s) URL. */
 export function openViewer(url: string, title?: string): void {
+  if (!isHttpUrl(url)) return;
   const base = chrome.runtime.getURL('src/viewer/index.html');
   const params = new URLSearchParams({ url });
   if (title) params.set('title', title);
@@ -25,6 +29,8 @@ export async function copyToClipboard(text: string): Promise<boolean> {
 
 /** Trigger a download via the downloads API (falls back to a tab). */
 export function downloadUrl(url: string, filename?: string): void {
+  // CSV/data: downloads from the popup are allowed; otherwise require http(s).
+  if (!url.startsWith('data:') && !isHttpUrl(url)) return;
   if (chrome.downloads?.download) {
     chrome.downloads.download(filename ? { url, filename } : { url });
   } else {
