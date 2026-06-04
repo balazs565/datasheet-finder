@@ -166,14 +166,26 @@ export function App() {
           <span className="brand-mark">DF</span>
           <span className="brand-name">Datasheet Finder</span>
         </div>
-        <button
-          className="btn-ghost btn-icon"
-          title="Settings"
-          aria-label="Settings"
-          onClick={() => chrome.runtime.openOptionsPage()}
-        >
-          ⚙️
-        </button>
+        <div className="header-actions">
+          <a
+            className="btn-ghost btn-icon"
+            href="https://ko-fi.com/balazs555"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Support me on Ko-fi"
+            aria-label="Support me on Ko-fi"
+          >
+            ☕
+          </a>
+          <button
+            className="btn-ghost btn-icon"
+            title="Settings"
+            aria-label="Settings"
+            onClick={() => chrome.runtime.openOptionsPage()}
+          >
+            ⚙️
+          </button>
+        </div>
       </header>
 
       <nav className="tabs">

@@ -13,7 +13,7 @@ import { defineManifest } from '@crxjs/vite-plugin';
 export default defineManifest({
   manifest_version: 3,
   name: 'Datasheet Finder',
-  version: '1.0.0',
+  version: '1.0.1',
   description:
     'Quickly find official datasheets, spec sheets, manuals and technical PDFs for any product.',
   icons: {

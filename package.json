@@ -1,6 +1,6 @@
 {
   "name": "datasheet-finder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Chrome Extension (MV3) to find official datasheets, spec sheets, manuals and technical PDFs for products.",
   "type": "module",
   "license": "MIT",
